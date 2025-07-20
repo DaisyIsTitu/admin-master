@@ -95,7 +95,7 @@ class ProductController(
         io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product deleted successfully"),
         io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product not found")
     )
-    fun deleteProduct(@PathVariable id: Long): ResponseEntity<ApiResponse<Nothing>> {
+    fun deleteProduct(@PathVariable id: Long): ResponseEntity<ApiResponse<Any?>> {
         productService.deleteProduct(id)
         return ResponseEntity.ok(ApiResponse.success(null, "Product deleted successfully"))
     }

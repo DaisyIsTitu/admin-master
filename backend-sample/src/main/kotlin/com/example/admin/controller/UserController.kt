@@ -89,7 +89,7 @@ class UserController(
         io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User deleted successfully"),
         io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
     )
-    fun deleteUser(@PathVariable id: Long): ResponseEntity<ApiResponse<Nothing>> {
+    fun deleteUser(@PathVariable id: Long): ResponseEntity<ApiResponse<Any?>> {
         userService.deleteUser(id)
         return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully"))
     }

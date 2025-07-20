@@ -43,7 +43,7 @@ class AuthController(
     
     @PostMapping("/logout")
     @Operation(summary = "User logout", description = "Logout user (client should remove tokens)")
-    fun logout(): ResponseEntity<ApiResponse<Nothing>> {
+    fun logout(): ResponseEntity<ApiResponse<Any?>> {
         return ResponseEntity.ok(ApiResponse.success(null, "Logout successful"))
     }
 }

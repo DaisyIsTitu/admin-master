@@ -2,7 +2,6 @@ package com.example.admin.config
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Component
 import java.util.*
@@ -18,18 +17,18 @@ class JwtUtil(
         val expiration = if (isRefresh) jwtProperties.refreshExpiration else jwtProperties.expiration
         
         return Jwts.builder()
-            .setSubject(username)
-            .setIssuedAt(Date())
-            .setExpiration(Date(System.currentTimeMillis() + expiration))
+            .subject(username)
+            .issuedAt(Date())
+            .expiration(Date(System.currentTimeMillis() + expiration))
             .claim("type", if (isRefresh) "refresh" else "access")
-            .signWith(key, SignatureAlgorithm.HS512)
+            .signWith(key)
             .compact()
     }
     
     fun validateToken(token: String): Boolean {
         return try {
             val claims = getClaims(token)
-            !claims.expiration.before(Date())
+            claims.expiration.after(Date())
         } catch (e: Exception) {
             false
         }
@@ -44,10 +43,10 @@ class JwtUtil(
     }
     
     private fun getClaims(token: String): Claims {
-        return Jwts.parserBuilder()
-            .setSigningKey(key)
+        return Jwts.parser()
+            .verifyWith(key)
             .build()
-            .parseClaimsJws(token)
-            .body
+            .parseSignedClaims(token)
+            .payload
     }
 }
