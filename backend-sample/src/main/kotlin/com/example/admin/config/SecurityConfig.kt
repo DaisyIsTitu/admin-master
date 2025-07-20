@@ -37,7 +37,23 @@ class SecurityConfig(
                         "/swagger-ui.html",
                         "/api-docs/**",
                         "/v3/api-docs/**",
-                        "/h2-console/**"
+                        "/h2-console/**",
+                        "/",
+                        "/index.html",
+                        "/static/**",
+                        "/assets/**",
+                        "/*.js",
+                        "/*.css",
+                        "/*.ico",
+                        "/*.png",
+                        "/*.jpg",
+                        "/*.jpeg",
+                        "/*.gif",
+                        "/*.svg",
+                        "/*.woff",
+                        "/*.woff2",
+                        "/*.ttf",
+                        "/*.eot"
                     ).permitAll()
                     .requestMatchers("/api/dashboard/**").hasAnyRole("ADMIN", "MANAGER")
                     .requestMatchers("/api/users/**").hasRole("ADMIN")

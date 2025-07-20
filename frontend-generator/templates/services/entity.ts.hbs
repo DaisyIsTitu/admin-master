@@ -1,0 +1,50 @@
+import { 
+  {{pascalCase entity.name}}, 
+  Create{{pascalCase entity.name}}Request, 
+  Update{{pascalCase entity.name}}Request,
+  PageResponse,
+  PaginationParams
+} from '@/types/api';
+import apiClient from './api-client';
+
+export class {{pascalCase entity.name}}Service {
+  private basePath = '/{{kebabCase entity.pluralName}}';
+
+  async getAll(params?: PaginationParams): Promise<PageResponse<{{pascalCase entity.name}}>> {
+    const response = await apiClient.get<PageResponse<{{pascalCase entity.name}}>>(this.basePath, params);
+    return response.data.data!;
+  }
+
+  async getById(id: number): Promise<{{pascalCase entity.name}}> {
+    const response = await apiClient.get<{{pascalCase entity.name}}>(`${this.basePath}/${id}`);
+    return response.data.data!;
+  }
+
+  async create(data: Create{{pascalCase entity.name}}Request): Promise<{{pascalCase entity.name}}> {
+    const response = await apiClient.post<{{pascalCase entity.name}}>(this.basePath, data);
+    return response.data.data!;
+  }
+
+  async update(id: number, data: Update{{pascalCase entity.name}}Request): Promise<{{pascalCase entity.name}}> {
+    const response = await apiClient.put<{{pascalCase entity.name}}>(`${this.basePath}/${id}`, data);
+    return response.data.data!;
+  }
+
+  async delete(id: number): Promise<void> {
+    await apiClient.delete(`${this.basePath}/${id}`);
+  }
+
+  {{#each entity.operations}}
+  {{#if (eq method 'GET')}}
+  {{#if (and parameters (eq (lookup parameters 0 'in') 'query'))}}
+  async {{camelCase operationId}}({{#each parameters}}{{name}}: {{type}}{{#unless @last}}, {{/unless}}{{/each}}): Promise<{{#if response.isArray}}{{response.type}}{{else}}{{response.type}}{{/if}}> {
+    const response = await apiClient.get<{{response.type}}>('{{path}}'{{#if parameters}}, { {{#each parameters}}{{name}}{{#unless @last}}, {{/unless}}{{/each}} }{{/if}});
+    return response.data.data!;
+  }
+  {{/if}}
+  {{/if}}
+  {{/each}}
+}
+
+export const {{camelCase entity.name}}Service = new {{pascalCase entity.name}}Service();
+export default {{camelCase entity.name}}Service;

@@ -1,0 +1,70 @@
+// Common types and interfaces
+
+export type Status = 'idle' | 'loading' | 'success' | 'error';
+
+export interface LoadingState {
+  status: Status;
+  error?: string;
+}
+
+export interface TableColumn<T = any> {
+  key: string;
+  title: string;
+  dataIndex?: keyof T;
+  render?: (value: any, record: T, index: number) => React.ReactNode;
+  sortable?: boolean;
+  filterable?: boolean;
+  width?: number | string;
+}
+
+export interface FormField {
+  name: string;
+  label: string;
+  type: 'text' | 'email' | 'password' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'radio';
+  required?: boolean;
+  placeholder?: string;
+  options?: { label: string; value: any }[];
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: RegExp;
+    message?: string;
+  };
+}
+
+export interface MenuItem {
+  key: string;
+  label: string;
+  icon?: React.ReactNode;
+  path?: string;
+  children?: MenuItem[];
+  roles?: string[];
+}
+
+export interface NotificationProps {
+  type: 'success' | 'error' | 'warning' | 'info';
+  title: string;
+  message?: string;
+  duration?: number;
+}
+
+{{#if authConfig.enabled}}
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  token: string | null;
+  loading: boolean;
+}
+{{/if}}

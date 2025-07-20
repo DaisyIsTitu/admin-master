@@ -1,0 +1,101 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+{{#ifEquals uiConfig.framework "material-ui"}}
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+{{/ifEquals}}
+{{#ifEquals uiConfig.framework "ant-design"}}
+import { ConfigProvider } from 'antd';
+import enUS from 'antd/locale/en_US';
+{{/ifEquals}}
+{{#ifEquals uiConfig.framework "chakra-ui"}}
+import { ChakraProvider } from '@chakra-ui/react';
+{{/ifEquals}}
+
+{{#if authConfig.enabled}}
+import { AuthProvider } from '@/context/AuthContext';
+import Login from '@/pages/Login';
+import ProtectedRoute from '@/components/common/ProtectedRoute';
+{{/if}}
+import Layout from '@/components/common/Layout';
+import Dashboard from '@/pages/Dashboard';
+{{#each entities}}
+import {{pascalCase name}}List from '@/pages/{{pascalCase name}}List';
+{{/each}}
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+{{#ifEquals uiConfig.framework "material-ui"}}
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
+{{/ifEquals}}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      {{#ifEquals uiConfig.framework "material-ui"}}
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+      {{/ifEquals}}
+      {{#ifEquals uiConfig.framework "ant-design"}}
+      <ConfigProvider locale={enUS}>
+      {{/ifEquals}}
+      {{#ifEquals uiConfig.framework "chakra-ui"}}
+      <ChakraProvider>
+      {{/ifEquals}}
+        {{#if authConfig.enabled}}
+        <AuthProvider>
+        {{/if}}
+          <Router>
+            <Routes>
+              {{#if authConfig.enabled}}
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }>
+              {{else}}
+              <Route path="/" element={<Layout />}>
+              {{/if}}
+                <Route index element={<Dashboard />} />
+                {{#each entities}}
+                <Route path="/{{kebabCase pluralName}}" element={<{{pascalCase name}}List />} />
+                {{/each}}
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Router>
+        {{#if authConfig.enabled}}
+        </AuthProvider>
+        {{/if}}
+      {{#ifEquals uiConfig.framework "material-ui"}}
+      </ThemeProvider>
+      {{/ifEquals}}
+      {{#ifEquals uiConfig.framework "ant-design"}}
+      </ConfigProvider>
+      {{/ifEquals}}
+      {{#ifEquals uiConfig.framework "chakra-ui"}}
+      </ChakraProvider>
+      {{/ifEquals}}
+    </QueryClientProvider>
+  );
+}
+
+export default App;

@@ -1,0 +1,97 @@
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { ApiResponse } from '@/types/api';
+
+class ApiClient {
+  private instance: AxiosInstance;
+
+  constructor() {
+    this.instance = axios.create({
+      baseURL: '{{#if apiConfig.baseUrl}}{{apiConfig.baseUrl}}{{else}}/api{{/if}}',
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    this.setupInterceptors();
+  }
+
+  private setupInterceptors(): void {
+    // Request interceptor
+    this.instance.interceptors.request.use(
+      (config) => {
+        {{#if authConfig.enabled}}
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        {{/if}}
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+
+    // Response interceptor
+    this.instance.interceptors.response.use(
+      (response: AxiosResponse<ApiResponse>) => {
+        return response;
+      },
+      async (error) => {
+        {{#if authConfig.enabled}}
+        if (error.response?.status === 401) {
+          // Try to refresh token
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            try {
+              const response = await this.post('/auth/refresh', { refreshToken });
+              const { accessToken, refreshToken: newRefreshToken } = response.data;
+              
+              localStorage.setItem('accessToken', accessToken);
+              localStorage.setItem('refreshToken', newRefreshToken);
+              
+              // Retry the original request
+              error.config.headers.Authorization = `Bearer ${accessToken}`;
+              return this.instance.request(error.config);
+            } catch (refreshError) {
+              // Refresh failed, redirect to login
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+              window.location.href = '/login';
+              return Promise.reject(refreshError);
+            }
+          } else {
+            // No refresh token, redirect to login
+            window.location.href = '/login';
+          }
+        }
+        {{/if}}
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  async get<T = any>(url: string, params?: any): Promise<AxiosResponse<ApiResponse<T>>> {
+    return this.instance.get(url, { params });
+  }
+
+  async post<T = any>(url: string, data?: any): Promise<AxiosResponse<ApiResponse<T>>> {
+    return this.instance.post(url, data);
+  }
+
+  async put<T = any>(url: string, data?: any): Promise<AxiosResponse<ApiResponse<T>>> {
+    return this.instance.put(url, data);
+  }
+
+  async patch<T = any>(url: string, data?: any): Promise<AxiosResponse<ApiResponse<T>>> {
+    return this.instance.patch(url, data);
+  }
+
+  async delete<T = any>(url: string): Promise<AxiosResponse<ApiResponse<T>>> {
+    return this.instance.delete(url);
+  }
+}
+
+export const apiClient = new ApiClient();
+export default apiClient;

@@ -1,0 +1,163 @@
+import React from 'react';
+{{#ifEquals uiConfig.framework "material-ui"}}
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  CardHeader
+} from '@mui/material';
+import {
+  People as PeopleIcon,
+  Inventory as InventoryIcon,
+  ShoppingCart as ShoppingCartIcon,
+  TrendingUp as TrendingUpIcon
+} from '@mui/icons-material';
+{{/ifEquals}}
+{{#ifEquals uiConfig.framework "ant-design"}}
+import {
+  Card,
+  Col,
+  Row,
+  Statistic,
+  Typography,
+  Space
+} from 'antd';
+import {
+  UserOutlined,
+  ShoppingOutlined,
+  ShoppingCartOutlined,
+  TrendingUpOutlined
+} from '@ant-design/icons';
+{{/ifEquals}}
+
+const { Title } = Typography;
+
+const Dashboard: React.FC = () => {
+  {{#ifEquals uiConfig.framework "material-ui"}}
+  const stats = [
+    {
+      title: 'Total Users',
+      value: '1,234',
+      icon: <PeopleIcon />,
+      color: '#1976d2'
+    },
+    {{#each entities}}
+    {
+      title: 'Total {{pascalCase pluralName}}',
+      value: '{{@index}}56',
+      icon: <{{#if (eq name 'Product')}}InventoryIcon{{else if (eq name 'Order')}}ShoppingCartIcon{{else}}TrendingUpIcon{{/if}} />,
+      color: '#{{#if (eq @index 0)}}2e7d32{{else if (eq @index 1)}}ed6c02{{else}}d32f2f{{/if}}'
+    },
+    {{/each}}
+  ];
+
+  return (
+    <Box sx={{ flexGrow: 1, p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        Dashboard
+      </Typography>
+      
+      <Grid container spacing={3}>
+        {stats.map((stat, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box>
+                    <Typography color="textSecondary" gutterBottom>
+                      {stat.title}
+                    </Typography>
+                    <Typography variant="h4">
+                      {stat.value}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ color: stat.color }}>
+                    {stat.icon}
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      <Grid container spacing={3} sx={{ mt: 2 }}>
+        <Grid item xs={12} md={8}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Recent Activity
+            </Typography>
+            <Typography color="textSecondary">
+              Activity chart and recent operations will be displayed here.
+            </Typography>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Quick Actions
+            </Typography>
+            <Typography color="textSecondary">
+              Quick action buttons will be displayed here.
+            </Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+  {{/ifEquals}}
+
+  {{#ifEquals uiConfig.framework "ant-design"}}
+  return (
+    <div style={{ padding: '24px' }}>
+      <Title level={2}>Dashboard</Title>
+      
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title="Total Users"
+              value={1234}
+              prefix={<UserOutlined />}
+            />
+          </Card>
+        </Col>
+        
+        {{#each entities}}
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title="Total {{pascalCase pluralName}}"
+              value={ {{@index}}56}
+              prefix={<{{#if (eq name 'Product')}}ShoppingOutlined{{else if (eq name 'Order')}}ShoppingCartOutlined{{else}}TrendingUpOutlined{{/if}} />}
+            />
+          </Card>
+        </Col>
+        {{/each}}
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+        <Col xs={24} md={16}>
+          <Card title="Recent Activity">
+            <p>Activity chart and recent operations will be displayed here.</p>
+          </Card>
+        </Col>
+        
+        <Col xs={24} md={8}>
+          <Card title="Quick Actions">
+            <Space direction="vertical">
+              <p>Quick action buttons will be displayed here.</p>
+            </Space>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+  {{/ifEquals}}
+};
+
+export default Dashboard;

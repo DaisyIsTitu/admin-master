@@ -1,0 +1,69 @@
+{{#if authConfig.enabled}}
+import { ApiResponse, AuthResponse, LoginRequest } from '@/types/api';
+import apiClient from './api-client';
+
+export class AuthService {
+  async login(credentials: LoginRequest): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('{{authConfig.loginEndpoint}}', credentials);
+    const authData = response.data.data!;
+    
+    // Store tokens
+    localStorage.setItem('accessToken', authData.accessToken);
+    localStorage.setItem('refreshToken', authData.refreshToken);
+    localStorage.setItem('user', JSON.stringify(authData.user));
+    
+    return authData;
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await apiClient.post('/auth/logout');
+    } catch (error) {
+      console.warn('Logout request failed:', error);
+    } finally {
+      // Clear local storage regardless of API call result
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+  }
+
+  async refreshToken(): Promise<AuthResponse> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await apiClient.post<AuthResponse>('{{authConfig.refreshEndpoint}}', {
+      refreshToken
+    });
+    
+    const authData = response.data.data!;
+    
+    // Update stored tokens
+    localStorage.setItem('accessToken', authData.accessToken);
+    localStorage.setItem('refreshToken', authData.refreshToken);
+    
+    return authData;
+  }
+
+  getCurrentUser() {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
+  }
+
+  getAccessToken(): string | null {
+    return localStorage.getItem('accessToken');
+  }
+
+  isAuthenticated(): boolean {
+    const token = this.getAccessToken();
+    const user = this.getCurrentUser();
+    return !!(token && user);
+  }
+}
+
+export const authService = new AuthService();
+export default authService;
+{{/if}}

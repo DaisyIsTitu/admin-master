@@ -1,0 +1,20 @@
+# Development Dockerfile for hot reloading
+FROM openjdk:17-jdk-alpine
+
+# Install Node.js
+RUN apk add --no-cache nodejs npm
+
+# Set working directory
+WORKDIR /app
+
+# Copy project files
+COPY . .
+
+# Make gradlew executable
+RUN chmod +x backend-sample/gradlew
+
+# Expose ports
+EXPOSE 8080 3000
+
+# Development startup script
+CMD ["sh", "-c", "cd backend-sample && ./gradlew bootRun --args='--spring.profiles.active=dev'"]

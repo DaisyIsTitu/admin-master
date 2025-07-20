@@ -1,0 +1,69 @@
+// Generated API types for {{projectName}}
+
+export interface ApiResponse<T = any> {
+  status: string;
+  message: string;
+  data?: T;
+}
+
+export interface PageResponse<T = any> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface PaginationParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+  direction?: 'ASC' | 'DESC';
+}
+
+{{#if authConfig.enabled}}
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user: User;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+{{/if}}
+
+// Entity interfaces
+{{#each entities}}
+export interface {{pascalCase name}} {
+  {{#each properties}}
+  {{name}}{{#unless required}}?{{/unless}}: {{type}};
+  {{/each}}
+}
+
+export interface Create{{pascalCase name}}Request {
+  {{#each properties}}
+  {{#unless isId}}
+  {{name}}{{#unless required}}?{{/unless}}: {{type}};
+  {{/unless}}
+  {{/each}}
+}
+
+export interface Update{{pascalCase name}}Request {
+  {{#each properties}}
+  {{#unless isId}}
+  {{name}}?: {{type}};
+  {{/unless}}
+  {{/each}}
+}
+
+{{/each}}

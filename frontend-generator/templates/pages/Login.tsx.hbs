@@ -1,0 +1,220 @@
+{{#if authConfig.enabled}}
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+{{#ifEquals uiConfig.framework "material-ui"}}
+import {
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  Container
+} from '@mui/material';
+{{/ifEquals}}
+{{#ifEquals uiConfig.framework "ant-design"}}
+import {
+  Form,
+  Input,
+  Button,
+  Card,
+  Typography,
+  Alert,
+  Space
+} from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
+{{/ifEquals}}
+import { authService } from '@/services/auth';
+import { LoginRequest } from '@/types/api';
+
+const { Title } = Typography;
+
+const Login: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  {{#ifEquals uiConfig.framework "material-ui"}}
+  const [formData, setFormData] = useState<LoginRequest>({
+    username: '',
+    password: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      await authService.login(formData);
+      navigate('/');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  return (
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Card sx={{ width: '100%', maxWidth: 400 }}>
+          <CardContent sx={{ p: 4 }}>
+            <Typography component="h1" variant="h4" align="center" gutterBottom>
+              {{projectName}}
+            </Typography>
+            <Typography variant="h6" align="center" color="textSecondary" gutterBottom>
+              Admin Dashboard
+            </Typography>
+            
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                name="username"
+                autoComplete="username"
+                autoFocus
+                value={formData.username}
+                onChange={handleChange}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
+              >
+                {loading ? 'Signing In...' : 'Sign In'}
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+    </Container>
+  );
+  {{/ifEquals}}
+
+  {{#ifEquals uiConfig.framework "ant-design"}}
+  const onFinish = async (values: LoginRequest) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await authService.login(values);
+      navigate('/');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      height: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      background: '#f0f2f5'
+    }}>
+      <Card style={{ width: 400 }}>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <Title level={2}>{{projectName}}</Title>
+          <Title level={4} type="secondary">Admin Dashboard</Title>
+        </div>
+
+        {error && (
+          <Alert
+            message={error}
+            type="error"
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+        )}
+
+        <Form
+          name="login"
+          onFinish={onFinish}
+          autoComplete="off"
+          layout="vertical"
+        >
+          <Form.Item
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: 'Please input your username!' }]}
+          >
+            <Input
+              prefix={<UserOutlined />}
+              placeholder="Username"
+              size="large"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: 'Please input your password!' }]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Password"
+              size="large"
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              size="large"
+              block
+            >
+              Sign In
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
+    </div>
+  );
+  {{/ifEquals}}
+};
+
+export default Login;
+{{/if}}
