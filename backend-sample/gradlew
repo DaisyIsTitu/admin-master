@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "Please run the following command to initialize the Gradle wrapper:"
+echo "gradle wrapper --gradle-version=8.5"
+echo ""
+echo "Or download Gradle and run: ./gradle/wrapper/gradle-wrapper.jar"
